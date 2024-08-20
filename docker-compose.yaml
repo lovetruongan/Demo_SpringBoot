@@ -1,5 +1,18 @@
 services:
-
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://demo-postgres-1:5432/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - Demo-network
   postgres:
     image: "postgres:${POSTGRES_VERSION}"
     ports:
@@ -10,5 +23,11 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - Demo-network
 volumes:
   postgres:
+networks:
+  Demo-network:
+    name: Demo-network
+    driver: bridge
