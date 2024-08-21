@@ -1,9 +1,13 @@
 package com.example.Demo.controller;
 
 import com.example.Demo.dto.request.UserCreationRequest;
+import com.example.Demo.dto.request.UserUpdateRequest;
+import com.example.Demo.dto.response.ApiResponse;
+import com.example.Demo.dto.response.UserResponse;
 import com.example.Demo.entity.User;
 import com.example.Demo.repository.UserRepository;
 import com.example.Demo.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -17,17 +21,20 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    public List<User> getUsers() {
+    List<UserResponse> getUsers() {
         return userService.getUsers();
     }
 
     @PostMapping
-    public User createUser(@RequestBody UserCreationRequest request) {
-        return userService.createUser(request);
+    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
+        ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.createUser(request));
+
+        return apiResponse;
     }
 
     @PutMapping("/{userId}")
-    public User updateUser(@PathVariable String userId, @RequestBody UserCreationRequest request) {
+    public User updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
         return userService.updateUser(userId, request);
     }
 
