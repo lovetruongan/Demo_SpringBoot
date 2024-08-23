@@ -21,27 +21,43 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    List<UserResponse> getUsers() {
-        return userService.getUsers();
+    ApiResponse<List<UserResponse>> getUsers() {
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.getUsers())
+                .message("Success")
+                .build();
+    }
+
+    @GetMapping("/{userId}")
+    ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getUser(userId))
+                .message("Success")
+                .build();
     }
 
     @PostMapping
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
-        ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setResult(userService.createUser(request));
-
-        return apiResponse;
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.createUser(request))
+                .message("User created successfully")
+                .build();
     }
 
     @PutMapping("/{userId}")
-    public User updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
-        return userService.updateUser(userId, request);
+    ApiResponse<UserResponse> updateUser(@PathVariable @Valid String userId, @RequestBody UserUpdateRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateUser(userId, request))
+                .message("User updated successfully")
+                .build();
     }
 
     @DeleteMapping("/{userId}")
-    public String deleteUser(@PathVariable String userId) {
+    ApiResponse<UserResponse> deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
-        return "User has been deleted";
+        return ApiResponse.<UserResponse>builder()
+                .message("User deleted successfully")
+                .build();
     }
 
 

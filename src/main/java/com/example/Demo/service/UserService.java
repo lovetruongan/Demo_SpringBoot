@@ -5,6 +5,8 @@ import com.example.Demo.dto.request.UserUpdateRequest;
 import com.example.Demo.dto.response.UserResponse;
 import com.example.Demo.entity.User;
 
+import com.example.Demo.exception.CustomException;
+import com.example.Demo.exception.ErrorCode;
 import com.example.Demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,6 @@ import java.util.List;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
-
 
     public List<UserResponse> getUsers() {
         return userRepository.findAll().stream()
@@ -29,9 +30,21 @@ public class UserService {
                 .toList();
     }
 
+    public UserResponse getUser(String userId) {
+        User user = userRepository.findById(Integer.valueOf(userId))
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTED));
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .build();
+    }
+
     public UserResponse createUser(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("User already exists");
+            throw new CustomException(ErrorCode.USER_EXISTED);
         }
         User user = User.builder()
                 .username(request.getUsername())
@@ -48,15 +61,20 @@ public class UserService {
                 .build();
     }
 
-    public User updateUser(String userId, UserUpdateRequest request) {
+    public UserResponse updateUser(String userId, UserUpdateRequest request) {
         User user = userRepository.findById(Integer.valueOf(userId))
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTED));
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setRole(request.getRole());
 
-        return userRepository.save(user);
+        return UserResponse.builder()
+                .id(userRepository.save(user).getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .build();
     }
 
     public void deleteUser(String userId) {
