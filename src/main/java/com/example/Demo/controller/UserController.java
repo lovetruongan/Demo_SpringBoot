@@ -4,12 +4,11 @@ import com.example.Demo.dto.request.UserCreationRequest;
 import com.example.Demo.dto.request.UserUpdateRequest;
 import com.example.Demo.dto.response.ApiResponse;
 import com.example.Demo.dto.response.UserResponse;
-import com.example.Demo.entity.User;
-import com.example.Demo.repository.UserRepository;
+import com.example.Demo.exception.CustomException;
+import com.example.Demo.exception.ErrorCode;
 import com.example.Demo.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -54,11 +53,16 @@ public class UserController {
 
     @DeleteMapping("/{userId}")
     ApiResponse<UserResponse> deleteUser(@PathVariable String userId) {
-        userService.deleteUser(userId);
+        try {
+            if (userService.getUser(userId) == null) {
+                throw new CustomException(ErrorCode.USER_NOT_EXISTED);
+            }
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.USER_NOT_EXISTED);
+        }
         return ApiResponse.<UserResponse>builder()
                 .message("User deleted successfully")
                 .build();
     }
-
 
 }
